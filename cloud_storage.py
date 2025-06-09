@@ -18,5 +18,3 @@ def upload_blob(bucket_name,  source_file_name, destination_blob_name):
 
     print(f"File {source_file_name} uploaded to {bucket_name}")
 
-
-upload_blob("ocr-pdf-bucket-68", "/Users/yaoruixu/Downloads/einstein_general_relativity.pdf", "einstein paper")
