@@ -63,7 +63,7 @@ def download_pdf(bucket_name, pdf_name, pdf_destination):
 
 
 def pdf_reader(pdf):
-    '''pdf reader which determines if searchable or not and appends to correct list'''
+    '''Pdf reader which determines if searchable or not and appends to correct list'''
 
     # create Reader obj
     reader = PdfReader(pdf)
@@ -87,7 +87,7 @@ def pdf_reader(pdf):
    
 
 def text_to_csv(text):
-    '''writes text to output.csv file, each sentence is a new row'''
+    '''Writes text to output.csv file, each sentence is a new row'''
 
     text_seperated = text.split(".")
     
@@ -101,7 +101,7 @@ def text_to_csv(text):
         writer.writerows(lst)
 
 def ocr_sorting_pipeline(files):
-    ''' ocr pipeline which logs searchable pdfs'''
+    ''' OCR pipeline which logs searchable pdfs'''
 
     log = []
     log.append(["file path", "searchable"])
