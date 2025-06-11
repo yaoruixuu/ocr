@@ -1,8 +1,15 @@
 from google.cloud import storage
 import google.auth
 
+from pypdf import PdfReader
+import csv
+
 # get creds
 credentials, project = google.auth.default()
+
+# searchable and non-searchable PDFs
+searchable = []
+non_searchable = []
 
 
 
@@ -50,10 +57,57 @@ def download_pdf(bucket_name, pdf_name, pdf_destination):
     blob = bucket.blob(pdf_name)
     blob.download_to_filename(pdf_destination)
 
+
+def pdf_reader(pdf):
+    reader = PdfReader(pdf)
+    number_of_pages = len(reader.pages)
+
     
+    page = reader.pages[3]
+    text = page.extract_text()
+
+    bool_searchable = not(len(text) == 0)
+
+    text_to_csv(text)
+
+    if bool_searchable:
+        searchable.append(pdf)
+
+    else:
+        non_searchable.append(pdf)
+   
+
+def text_to_csv(text):
+    text_seperated = text.split(".")
+    
+    lst=[]
+    for item in text_seperated:
+        lst.append(item.split())
+       
+    with open('output.csv', 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerows(lst)
+
+def ocr_sorting_pipeline(files):
+    log = []
+    log.append(["file path", "searchable"])
+    for file in files:
+        pdf_reader(file)
+
+        if file in searchable:
+            log.append([file, "yes"])
+        else:
+            log.append([file, "no"])
+
+    with open('log.csv', 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerows(log)
 
 
-#inconclusive test, network too slow
+#ocr_sorting_pipeline(["/Users/yaoruixu/Downloads/calc2final_answers.pdf", "/Users/yaoruixu/Downloads/LargeScale_paper.pdf",])
+
+#pdf_reader("/Users/yaoruixu/Downloads/calc2final_answers.pdf")
+
 #download_pdf("ocr-pdf-bucket-68", "karpathy_paper", "/Users/yaoruixu/Downloads/download_test1.pdf")
 
 # upload_blob("ocr-pdf-bucket-68", "/Users/yaoruixu/Downloads/LargeScale_paper.pdf", "karpathy_paper")
