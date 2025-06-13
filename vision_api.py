@@ -7,6 +7,8 @@ import re
 
 
 
+
+
 def async_document_detection(gcs_source_uri, gcs_destination_uri):
 
     # type
@@ -55,14 +57,19 @@ def async_document_detection(gcs_source_uri, gcs_destination_uri):
         if not blob.name.endswith("/")
     ]
 
+    # sort json files numerically
+    blob_list.sort(key=lambda blob: extract_page_number(blob.name))
+
     print("Output files:")
     for blob in blob_list:
         print(blob.name)
 
 
 
-    # print pages
+    # print and write pages
     print("Full text:\n")
+    with open("demofile.txt", "w") as f:
+            f.write("----------Text After OCR-----------\n\n")
     for blob in blob_list:
         json_string = blob.download_as_bytes().decode("utf-8")
         response = json.loads(json_string)
@@ -70,10 +77,38 @@ def async_document_detection(gcs_source_uri, gcs_destination_uri):
         first_page_response = response["responses"][0]
         annotation = first_page_response["fullTextAnnotation"]
 
-        print(annotation["text"])
+        with open("demofile.txt", "a") as f:
+            f.write(annotation["text"])
+
+        #print(annotation["text"])
+
+    with open("demofile.txt", "a", encoding="utf-8") as f:
+            f.write("----------Text After OCR-----------\n\n")
+
+
+def extract_page_number(blob_name):
+        match = re.search(r'ocr-outputoutput-(\d+)-to-\d+\.json', blob_name)
+        if match:
+            return int(match.group(1)) # Convert the captured string to an integer
+        return 0 # Default if pattern not found (shouldn't happen with valid filenames)
+
     
+def evaluation_script(filepath, ground_truth):
+    from Levenshtein import distance
+    
+    with open(filepath, 'r', encoding='utf-8') as file:
+            content = file.read()
+
+    distance = distance(content, ground_truth)
+
+    return distance
+
+with open("/Users/yaoruixu/dev/orc/ground_truth.txt", 'r') as file:
+    content = file.read()
+
+print(evaluation_script("/Users/yaoruixu/dev/orc/demofile.txt", content))
     
 
 
-async_document_detection("gs://ocr-pdf-bucket-68/einstein paper", "gs://ocr-output-1/ocr-output")
+#async_document_detection("gs://ocr-pdf-bucket-68/gadget", "gs://ocr-output-1/ocr-output")
 

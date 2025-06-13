@@ -4,12 +4,16 @@ import google.auth
 from pypdf import PdfReader
 import csv
 
+
+
 # get creds
 credentials, project = google.auth.default()
 
 # searchable and non-searchable PDFs
 searchable = []
 non_searchable = []
+
+GOOGLE_APPLICATION_CREDENTIALS = ""
 
 
 
@@ -46,7 +50,7 @@ def list_pdfs(bucket_name):
     for blob in blobs:
         print(blob.name)
 
-def download_pdf(bucket_name, pdf_name, pdf_destination):
+def download_blob(bucket_name, pdf_name, pdf_destination):
     '''Downloads specified pdf from bucket_name'''
 
     # create client
@@ -119,3 +123,7 @@ def ocr_sorting_pipeline(files):
         writer.writerows(log)
 
 
+
+
+
+upload_blob("ocr-pdf-bucket-68", "/Users/yaoruixu/Downloads/gadget.pdf", "gadget")
