@@ -13,7 +13,7 @@ def async_document_detection(gcs_source_uri, gcs_destination_uri):
     mime_type = "application/pdf"
 
     # output file max pages
-    batch_size = 2
+    batch_size = 1
 
     # client
     client = vision.ImageAnnotatorClient()
@@ -62,14 +62,6 @@ def async_document_detection(gcs_source_uri, gcs_destination_uri):
 
 
     # print pages
-    print_json(blob_list)
-    
-    
-
-
-def print_json(blob_list):
-    from cloud_storage import text_to_csv
-
     print("Full text:\n")
     for blob in blob_list:
         json_string = blob.download_as_bytes().decode("utf-8")
@@ -80,16 +72,8 @@ def print_json(blob_list):
 
         print(annotation["text"])
     
-
-        second_response = response["responses"][1]
-        annotation = second_response["fullTextAnnotation"]
-
-        print(annotation["text"])
-        
-
     
 
 
-
-async_document_detection("gs://ocr-pdf-bucket-68/calc", "gs://ocr-output-1/ocr-output")
+async_document_detection("gs://ocr-pdf-bucket-68/einstein paper", "gs://ocr-output-1/ocr-output")
 
