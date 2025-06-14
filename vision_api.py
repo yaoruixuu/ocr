@@ -5,11 +5,8 @@ import json
 import re
 
 
-
-
-
-
 def async_document_detection(gcs_source_uri, gcs_destination_uri):
+    '''async ocr on document gcs_source_uri, output results to gcs_destination_uri'''
 
     # type
     mime_type = "application/pdf"
@@ -43,7 +40,6 @@ def async_document_detection(gcs_source_uri, gcs_destination_uri):
 
     storage_client = storage.Client()
 
-############
     match = re.match(r"gs://([^/]+)/(.+)", gcs_destination_uri)
     bucket_name = match.group(1)
     prefix = match.group(2)
@@ -67,6 +63,7 @@ def async_document_detection(gcs_source_uri, gcs_destination_uri):
 
 
     # print and write pages
+    page_count = 1
     print("Full text:\n")
     with open("demofile.txt", "w") as f:
             f.write("----------Text After OCR-----------\n\n")
@@ -78,7 +75,9 @@ def async_document_detection(gcs_source_uri, gcs_destination_uri):
         annotation = first_page_response["fullTextAnnotation"]
 
         with open("demofile.txt", "a") as f:
+            f.write(f"\n--------Page {page_count}--------\n")
             f.write(annotation["text"])
+            page_count += 1
 
         #print(annotation["text"])
 
@@ -87,28 +86,33 @@ def async_document_detection(gcs_source_uri, gcs_destination_uri):
 
 
 def extract_page_number(blob_name):
-        match = re.search(r'ocr-outputoutput-(\d+)-to-\d+\.json', blob_name)
-        if match:
-            return int(match.group(1)) # Convert the captured string to an integer
-        return 0 # Default if pattern not found (shouldn't happen with valid filenames)
+    '''extract page number from filename'''
+    match = re.search(r'ocr-outputoutput-(\d+)-to-\d+\.json', blob_name)
+    if match:
+        return int(match.group(1)) # Convert the captured string to an integer
+    return 0 # Default if pattern not found (shouldn't happen with valid filenames)
 
     
-def evaluation_script(filepath, ground_truth):
+def evaluation_script(filepath, ground_truth_filepath):
+    '''print and return levenshtein distance between document and ground truth'''
+
     from Levenshtein import distance
-    
+
+    with open(ground_truth_filepath, 'r') as file:
+        ground_truth = file.read()
+
     with open(filepath, 'r', encoding='utf-8') as file:
-            content = file.read()
+        content = file.read()
 
     distance = distance(content, ground_truth)
 
+    print("Score:" + str(distance))
+
+    print("Accuracy: "+ str((len(content) - distance)/len(content)*100)+"%")
+    
     return distance
 
-with open("/Users/yaoruixu/dev/orc/ground_truth.txt", 'r') as file:
-    content = file.read()
-
-print(evaluation_script("/Users/yaoruixu/dev/orc/demofile.txt", content))
-    
 
 
-#async_document_detection("gs://ocr-pdf-bucket-68/gadget", "gs://ocr-output-1/ocr-output")
+
 
