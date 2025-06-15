@@ -81,8 +81,7 @@ def async_document_detection(gcs_source_uri, gcs_destination_uri):
 
         #print(annotation["text"])
 
-    with open("demofile.txt", "a", encoding="utf-8") as f:
-            f.write("----------Text After OCR-----------\n\n")
+ 
 
 
 def extract_page_number(blob_name):
